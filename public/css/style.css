@@ -1,0 +1,29 @@
+
+
+body{
+    min-height: 100vh;
+}
+
+.landingPage{
+    min-height: 100vh;
+    font-family: "Roboto", sans-serif;
+}
+
+.brandTitle{
+    font-size: 7rem;
+    color: #994D1C;
+    letter-spacing: -2px;
+}
+
+.sansita{
+    display: inline-block;
+    font-family: "Sansita Swashed", system-ui;
+    transform: rotate(-10deg);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    display: none;
+}
+
+

@@ -40,10 +40,11 @@ class GoogleAuthController extends Controller
 
             Auth::login($user);
 
-            // ✅ Redirect berdasarkan role
             if ($user->role === 'admin') {
                 return redirect('/admin')->with('success', 'Berhasil login sebagai admin.');
             }
+
+            dd($user->avatar);
 
             return redirect('/homepage')->with('success', 'Berhasil login dengan Google.');
         } catch (\Exception $e) {

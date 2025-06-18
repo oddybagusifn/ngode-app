@@ -12,10 +12,12 @@ class Product extends Model
         'category_id',
         'stock',
         'price',
+        'image',
+        'description',
     ];
 
-    public function categories()
+    public function category()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 }

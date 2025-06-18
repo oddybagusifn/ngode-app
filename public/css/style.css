@@ -21,9 +21,18 @@ body{
     transform: rotate(-10deg);
 }
 
+
 input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0;
-    display: none;
 }
+
+@media (min-width: 992px) {
+    .col-lg-2-4 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}
+
+
 
 

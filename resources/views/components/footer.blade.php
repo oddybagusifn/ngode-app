@@ -1,4 +1,4 @@
-<footer class="bg-white pt-4 mt-5" style="border-top: 1px solid #eee;">
+<footer class="bg-white pt-4 mt-3" style="border-top: 1px solid #eee;">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center flex-wrap py-5">
             <img src="/img/brand.svg" alt="">

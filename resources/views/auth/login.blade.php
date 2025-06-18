@@ -1,4 +1,7 @@
-<x-layout>
+
+@extends('layouts.app')
+
+@section('content')
     <div class="container-fluid vh-100">
         <div class="row h-100">
 
@@ -70,4 +73,4 @@
 
         </div>
     </div>
-</x-layout>
+@endsection

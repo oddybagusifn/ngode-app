@@ -18,7 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->integer('stock')->default(0);
             $table->bigInteger('price');
-            $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->string('image');
+            $table->text('description');
             $table->timestamps();
         });
     }

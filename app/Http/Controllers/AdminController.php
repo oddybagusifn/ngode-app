@@ -60,16 +60,16 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-    'name'         => 'required|string|max:255',
-    'stock'        => 'required|integer|min:0',
-    'price'        => 'required|numeric|min:0',
-    'categories'   => 'required|array|min:1',
-    'categories.0' => 'exists:categories,id',
-    'description'  => 'required|string|max:1000',
-    'image'        => 'nullable|image|max:10240',         // 10MB dengan MIME otomatis
-    'thumbnails'   => 'nullable|array|max:5',
-    'thumbnails.*' => 'image|max:10240',                  // 10MB dengan MIME otomatis
-]);
+            'name'         => 'required|string|max:255',
+            'stock'        => 'required|integer|min:0',
+            'price'        => 'required|numeric|min:0',
+            'categories'   => 'required|array|min:1',
+            'categories.0' => 'exists:categories,id',
+            'description'  => 'required|string|max:1000',
+            'image'        => 'nullable|image|max:10240',         // 10MB dengan MIME otomatis
+            'thumbnails'   => 'nullable|array|max:5',
+            'thumbnails.*' => 'image|max:10240',                  // 10MB dengan MIME otomatis
+        ]);
 
 
         // Generate kode unik

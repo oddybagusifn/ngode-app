@@ -41,6 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'binderbyte' => [
+        'key' => env('92fe18cb91d81b605393db36e45a5ed7ef24cf0cd557ba1b9d8552c1e27a4907'),
+    ],
+
 
 
 ];

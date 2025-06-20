@@ -8,5 +8,4 @@
     </div>
     <x-footer />
     <x-cart-sidebar />
-
 @endsection

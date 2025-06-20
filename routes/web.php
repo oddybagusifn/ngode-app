@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return view('landingPage');
@@ -60,8 +61,13 @@ Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.dele
 Route::get('/cart/fetch', [CartController::class, 'fetch'])->name('cart.fetch');
 
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::get('/checkout/kabupaten', [CheckoutController::class, 'getKabupaten'])->name('checkout.kabupaten');
+Route::get('/checkout/kecamatan', [CheckoutController::class, 'getKecamatan'])->name('checkout.kecamatan');
+Route::get('/checkout/kelurahan', [CheckoutController::class, 'getKelurahan'])->name('checkout.kelurahan');
+Route::get('/checkout/list-kurir', [CheckoutController::class, 'listKurir'])
+    ->name('checkout.listKurir');
 
 
-
-
+Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::post('/checkout/payment', [PaymentController::class, 'index'])->name('checkout.payment');
 

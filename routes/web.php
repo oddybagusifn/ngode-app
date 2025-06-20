@@ -2,12 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
-use App\Http\Controllers\LoginController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('landingPage');
@@ -19,7 +21,7 @@ Route::get('/homepage/product/{id}', [UserController::class, 'product'])->name('
 Route::get('/register', [RegisterController::class, 'index']);
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-Route::get('/login', [LoginController::class, 'index']);
+Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
 Route::middleware(['auth'])->group(function () {
@@ -51,4 +53,15 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
 
     Route::get('/admin/products/search', [AdminController::class, 'search'])->name('admin.product.search');
 });
+
+
+Route::post('/cart/store', [CartController::class, 'store'])->name('cart.store')->middleware('auth');
+Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.delete');
+Route::get('/cart/fetch', [CartController::class, 'fetch'])->name('cart.fetch');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+
+
+
+
 

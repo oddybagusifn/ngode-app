@@ -33,6 +33,44 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 }
 
+.thumbnail-img.active-thumb {
+            border: 2px solid #994D1C !important;
+        }
+
+        .variation-img.active-variation {
+    border: 2px solid #994D1C !important;
+}
+
+    .cart-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1049;
+    }
+
+    .cart-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 400px;
+        height: 100vh;
+        background: #fff;
+        z-index: 1050;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        border-left: 1px solid #F5CCA0;
+    }
+
+    .cart-sidebar.show {
+        transform: translateX(0);
+    }
+
+
+
 
 
 

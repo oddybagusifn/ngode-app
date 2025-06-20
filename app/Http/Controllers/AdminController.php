@@ -60,94 +60,132 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'stock' => 'required|integer|min:0',
-            'price' => 'required|numeric|min:0',
-            'categories' => 'required|array|min:1',
-            'categories.0' => 'exists:categories,id',
-            'description' => 'required|string|max:1000',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+    'name'         => 'required|string|max:255',
+    'stock'        => 'required|integer|min:0',
+    'price'        => 'required|numeric|min:0',
+    'categories'   => 'required|array|min:1',
+    'categories.0' => 'exists:categories,id',
+    'description'  => 'required|string|max:1000',
+    'image'        => 'nullable|image|max:10240',         // 10MB dengan MIME otomatis
+    'thumbnails'   => 'nullable|array|max:5',
+    'thumbnails.*' => 'image|max:10240',                  // 10MB dengan MIME otomatis
+]);
+
 
         // Generate kode unik
         do {
             $randomCode = '#ZY' . rand(1000, 9999);
         } while (Product::where('product_code', $randomCode)->exists());
 
+        // Simpan gambar utama
         $imagePath = null;
-
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $imageFile = $request->file('image');
+            $imageName = time() . '_main_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+            $destination = public_path('uploads/product_images');
 
-            // Folder di public/
-            $destinationPath = public_path('uploads/product_images');
-
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
             }
 
-            $image->move($destinationPath, $imageName);
-
+            $imageFile->move($destination, $imageName);
             $imagePath = 'uploads/product_images/' . $imageName;
         }
 
-        Product::create([
+        // Simpan gambar thumbnail
+        $thumbnailPaths = [];
+        foreach ($request->file('thumbnails') as $file) {
+            $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($destination, $fileName);
+            $thumbnailPaths[] = 'uploads/product_images/' . $fileName;
+        }
+
+        // Simpan produk
+        $product = Product::create([
             'product_code' => $randomCode,
             'name'         => $request->name,
             'stock'        => $request->stock,
             'price'        => $request->price,
             'description'  => $request->description,
-            'image'        => $imagePath,
+            'image'        => $imagePath, // ← Gambar utama disimpan di sini
             'category_id'  => $request->categories[0],
         ]);
 
-        return redirect()->route('admin.products.show')->with('success', 'Produk berhasil ditambahkan');
+        // Simpan gambar-gambar tambahan ke tabel product_images
+        foreach ($thumbnailPaths as $path) {
+            $product->images()->create([
+                'image_path' => $path,
+            ]);
+        }
+
+        return redirect()->route('admin.products.show')->with('success', 'Produk berhasil ditambahkan.');
     }
+
+
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'stock' => 'required|integer',
-            'price' => 'required|numeric',
-            'categories' => 'required|array|min:1',
+            'name'         => 'required|string|max:255',
+            'stock'        => 'required|integer|min:0',
+            'price'        => 'required|numeric|min:0',
+            'categories'   => 'required|array|min:1',
             'categories.0' => 'exists:categories,id',
-            'description' => 'required|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'description'  => 'required|string|max:1000',
+            'image'        => 'nullable|image|max:10240',         // 10MB dengan MIME otomatis
+            'thumbnails'   => 'nullable|array|max:5',
+            'thumbnails.*' => 'image|max:10240',                  // 10MB dengan MIME otomatis
         ]);
+
 
         $product = Product::findOrFail($id);
 
+        // ✅ Ganti gambar utama jika ada
         if ($request->hasFile('image')) {
-            // Hapus gambar lama
             if ($product->image && file_exists(public_path($product->image))) {
                 unlink(public_path($product->image));
             }
 
             $image = $request->file('image');
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('uploads/product_images');
-
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-
-            $image->move($destinationPath, $imageName);
+            $image->move(public_path('uploads/product_images'), $imageName);
 
             $product->image = 'uploads/product_images/' . $imageName;
         }
 
-        $product->name = $request->name;
-        $product->stock = $request->stock;
-        $product->price = $request->price;
-        $product->description = $request->description;
-        $product->category_id = $request->categories[0];
+        // ✅ Hapus thumbnail lama jika ada thumbnail baru diupload
+        if ($request->hasFile('thumbnails')) {
+            foreach ($product->images as $oldImage) {
+                $oldPath = public_path($oldImage->image_path);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+                $oldImage->delete();
+            }
 
+            foreach ($request->file('thumbnails') as $file) {
+                $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/product_images'), $fileName);
+
+                $product->images()->create([
+                    'image_path' => 'uploads/product_images/' . $fileName,
+                ]);
+            }
+        }
+
+        // ✅ Update field lainnya
+        $product->name         = $request->name;
+        $product->stock        = $request->stock;
+        $product->price        = $request->price;
+        $product->description  = $request->description;
+        $product->category_id  = $request->categories[0];
         $product->save();
 
         return redirect()->route('admin.products.show')->with('success', 'Produk berhasil diperbarui.');
     }
+
+
+
 
     public function destroy($id)
     {

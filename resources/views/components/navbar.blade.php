@@ -3,7 +3,6 @@
 
     $user = Auth::user();
 
-
     if ($user) {
         $initial = strtoupper(substr($user->name, 0, 1));
 
@@ -20,10 +19,8 @@
     }
 @endphp
 
-
-
-<nav class="navbar navbar-expand-lg bg-body-transparent d-flex flex-column" >
-    <div class="container-fluid" >
+<nav class="navbar navbar-expand-lg bg-body-light d-flex flex-column">
+    <div class="container-fluid">
         <a class="navbar-brand" href="{{ route('homepage') }}">
             <img class="img-fluid" src="/img/brand.svg" alt="">
         </a>
@@ -44,37 +41,52 @@
                     <img class="img-fluid me-2" style="width: 45px" src="/img/filter.svg" alt="Icon Filter">
                 </div>
             </div>
+
             <div class="d-flex flex-column flex-sm-row align-items-center ms-auto gap-2">
-                <a class="nav-link text-secondary rounded-circle p-0 me-3" href="#"
-                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                    <img src="{{ asset('img/cart.svg') }}" alt="Keranjang">
-                </a>
+                <div class="me-3">
+                    <div class="position-relative">
+                        <button onclick="toggleCartSidebar()" class="btn p-0">
+                            <img src="/img/cart.svg" alt="Cart">
+                            @if (isset($cartItemsCount) && $cartItemsCount > 0)
+                                <span class="position-absolute start-100 badge rounded-pill bg-danger"
+                                    style="top: 6px; transform: translate(-90%, 0); font-size: 0.6rem; min-width: 16px; height: 16px; padding: 2px 4px;">
+                                    {{ $cartItemsCount }}
+                                </span>
+                            @endif
+                        </button>
+                    </div>
+                </div>
+
 
                 <a class="nav-link text-secondary rounded-circle p-0 me-3" href="#"
                     style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                     <img src="{{ asset('img/favorite.svg') }}" alt="Fav">
                 </a>
 
-                <div class="dropdown">
-                    <button class="d-flex align-items-center justify-content-center p-0 border-0 bg-transparent"
-                        type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                        style="width: 40px; height: 40px; border-radius: 50%;">
-                        @if ($user && $user->google_id && $user->avatar)
-                            <img src="{{ $user->avatar }}" alt="Profile"
-                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                        @elseif ($user)
-                            <div
-                                style="width: 40px; height: 40px; border-radius: 50%; background: {{ $bgGradient }};
-               color: white; display: flex; align-items: center; justify-content: center;
-               font-weight: bold;">
-                                {{ $initial }}
-                            </div>
-                        @endif
+                @if ($user)
+                    <div class="dropdown">
+                        <button class="d-flex align-items-center justify-content-center p-0 border-0 bg-transparent"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            style="width: 40px; height: 40px; border-radius: 50%;">
+                            @if ($user->google_id && $user->avatar)
+                                <img src="{{ asset($user->avatar) }}" alt="Profile"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />
+                            @else
+                                <div
+                                    style="width: 40px; height: 40px; border-radius: 50%; background: {{ $bgGradient }};
+                                    color: white; display: flex; align-items: center; justify-content: center;
+                                    font-weight: bold;">
+                                    {{ $initial }}
+                                </div>
+                            @endif
+                        </button>
 
-                    </button>
-                    @if ($user->role == 'user')
                         <ul class="dropdown-menu dropdown-menu-end mt-2">
                             <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            @if ($user->role === 'admin')
+                                <li><a class="dropdown-item" href="/admin">Dashboard</a></li>
+                            @endif
                             <li>
                                 <form method="POST" action="/logout">
                                     @csrf
@@ -82,38 +94,24 @@
                                 </form>
                             </li>
                         </ul>
-                    @elseif ($user->role == 'admin')
-                        <ul class="dropdown-menu dropdown-menu-end mt-2">
-                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                            <li><a class="dropdown-item" href="/admin">Dashboard</a></li>
-                            <li>
-                                <form method="POST" action="/logout">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    @endif
-                </div>
+                    </div>
+                @endif
             </div>
-
-
         </div>
     </div>
+
     <div class="navbar-link container-fluid mt-3 p-4" style="border-bottom: 1px solid #F5CCA0">
         <ul class="navbar-nav gap-4">
             <li class="nav-item">
-                <a class="nav-link text-secondary active" aria-current="page" href="/admin">Terkait</a>
+                @if ($user && $user->role === 'admin')
+                    <a class="nav-link text-secondary active" aria-current="page" href="/admin">Terkait</a>
+                @else
+                    <a class="nav-link text-secondary active" aria-current="page" href="#">Terkait</a>
+                @endif
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-secondary" href="#">Terbaru</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-secondary" href="#">Terlaris</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-secondary" href="#">Teratas</a>
-            </li>
+            <li class="nav-item"><a class="nav-link text-secondary" href="#">Terbaru</a></li>
+            <li class="nav-item"><a class="nav-link text-secondary" href="#">Terlaris</a></li>
+            <li class="nav-item"><a class="nav-link text-secondary" href="#">Teratas</a></li>
         </ul>
     </div>
 </nav>

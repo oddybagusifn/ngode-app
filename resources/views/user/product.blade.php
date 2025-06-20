@@ -23,112 +23,185 @@
             <div class="col-lg-6 d-flex flex-column align-items-start justify-content-start h-100 mb-2">
                 <!-- Gambar Utama -->
                 <div class="flex-grow-1 w-100 d-flex bg-light border rounded-3 mb-3" style="height: 550px;">
-                    <img src="{{ asset($products->image) }}" class="w-100 h-100 rounded-3"
-                        style="object-fit: contain;" alt="Gambar Produk">
+                    <img id="mainImage" src="{{ $products->image ? asset($products->image) : asset('img/no-image.png') }}"
+                        class="w-100 h-100 rounded-3" style="object-fit: contain;" alt="Gambar Produk">
+
                 </div>
-
-
 
                 <!-- Thumbnails -->
-                <div class="w-100 d-flex justify-content-start">
-                    <div class="row row-cols-3 g-3" style="max-width: 100%;">
-                        <div class="col d-flex justify-content-center">
-                            <img src="{{ asset($products->image) }}" class="img-fluid rounded"
-                                style="border: 2px solid #994D1C; max-width: 120px; cursor: pointer;" alt="Thumb 1">
+                <div class="w-100">
+                    <div class="row row-cols-auto flex-nowrap overflow-auto" style="max-width: 100%; gap: 0;">
+                        <div class="col flex-shrink-0">
+                            <img src="{{ asset($products->image) }}"
+                                class="img-fluid rounded border thumbnail-img active-thumb"
+                                data-img="{{ asset($products->image) }}" style="max-width: 120px; cursor: pointer;"
+                                alt="Thumbnail Utama">
                         </div>
-                        <div class="col d-flex justify-content-center">
-                            <img src="{{ asset($products->image) }}" class="img-fluid rounded border"
-                                style="max-width: 120px; cursor: pointer;" alt="Thumb 2">
-                        </div>
-                        <div class="col d-flex justify-content-center">
-                            <img src="{{ asset($products->image) }}" class="img-fluid rounded border"
-                                style="max-width: 120px; cursor: pointer;" alt="Thumb 3">
-                        </div>
+
+                        @foreach ($products->images as $image)
+                            <div class="col flex-shrink-0">
+                                <img src="{{ asset($image->image_path) }}" class="img-fluid rounded border thumbnail-img"
+                                    data-img="{{ asset($image->image_path) }}" style="max-width: 120px; cursor: pointer;"
+                                    alt="Thumbnail Produk">
+                            </div>
+                        @endforeach
                     </div>
                 </div>
+
+                @push('scripts')
+                    <script>
+                        document.querySelectorAll('.thumbnail-img').forEach(thumbnail => {
+                            thumbnail.addEventListener('click', function() {
+                                const newSrc = this.getAttribute('data-img');
+                                document.getElementById('mainImage').setAttribute('src', newSrc);
+
+                                // Reset border dari semua thumbnail
+                                document.querySelectorAll('.thumbnail-img').forEach(img => {
+                                    img.classList.remove('active-thumb');
+                                    img.style.border = '1px solid #dee2e6';
+                                });
+
+                                // Highlight thumbnail aktif
+                                this.classList.add('active-thumb');
+                                this.style.border = '2px solid #994D1C';
+                            });
+                        });
+                    </script>
+                @endpush
             </div>
 
 
-            <!-- Detail Produk -->
+
+            <!-- Form Input Produk -->
             <div class="col-lg-6">
-                <!-- Nama & Rating -->
-                <div class="mb-5">
-                    <h6 class="text-muted">Maju Mundur Keramik</h6>
-                    <h3>{{ $products->name }}</h3>
-
-                    <!-- Rating -->
-                    <div class="d-flex align-items-center mt-2">
-                        <div class="me-2 text-warning">
-                            @for ($i = 0; $i < 5; $i++)
-                                <img src="/img/star.svg" class="img-fluid" alt="⭐">
-                            @endfor
-                        </div>
-                        <div class="text-muted">42 Ulasan</div>
-                    </div>
-                </div>
-
-                <h4 class="mb-4 fs-3">Rp{{ number_format($products->price, 0, ',', '.') }}</h4>
-                <!-- Harga & Variasi -->
-                <div class="mb-4 mt-5">
-
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <p class="m-0 fw-semibold">Variasi</p>
-                        <div class="d-flex gap-3">
-                            <button class="btn border rounded-3 text-nowrap" style="color: #994D1C;">Tampilan 3D</button>
-                            <button class="btn border rounded-3 text-nowrap" style="color: #994D1C;">Coba Sekarang</button>
+                <form method="POST" action="{{ route('cart.store') }}">
+                    @csrf
+                    <input type="hidden" name="product_id" value="{{ $products->id }}">
+                    <input type="hidden" name="name" value="{{ $products->name }}">
+                    <input type="hidden" name="price" value="{{ $products->price }}">
+                    <input type="hidden" name="image" value="{{ $products->image }}">
+                    <!-- Nama & Rating -->
+                    <div class="mb-5">
+                        <h6 class="text-muted">Maju Mundur Keramik</h6>
+                        <h3>{{ $products->name }}</h3>
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="me-2 text-warning">
+                                @for ($i = 0; $i < 5; $i++)
+                                    <img src="/img/star.svg" class="img-fluid" alt="⭐">
+                                @endfor
+                            </div>
+                            <div class="text-muted">42 Ulasan</div>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-3">
-                        <img src="{{ asset($products->image) }}" class="img-thumbnail1 rounded-3"
-                            style="width: 110px; border: 2px solid #994D1C;" alt="Variasi 1">
-                        <img src="{{ asset($products->image) }}" class="img-thumbnail1 rounded-3 border"
-                            style="width: 110px;" alt="Variasi 2">
-                        <img src="{{ asset($products->image) }}" class="img-thumbnail1 rounded-3 border"
-                            style="width: 110px;" alt="Variasi 3">
-                    </div>
-                </div>
+                    <h4 class="mb-4 fs-3">Rp{{ number_format($products->price, 0, ',', '.') }}</h4>
 
-                <!-- Ukuran -->
-                <div class="mb-5 pb-5">
-                    <div class="d-flex justify-content-between ">
-                        <p class="fw-semibold">Ukuran</p>
-                        <a href="#" class="text-secondary text-decoration-none">
-                            <img src="/img/massage.svg" class="img-fluid" alt="Ukuran"> Petunjuk Ukuran
-                        </a>
-                    </div>
-                    <div class="btn-group gap-4" role="group">
-                        <button type="button" class="btn bg-light rounded-pill px-4 py-2">Besar</button>
-                        <button type="button" class="btn bg-light rounded-pill px-4 py-2">Sedang</button>
-                        <button type="button" class="btn bg-light rounded-pill px-4 py-2">Kecil</button>
-                    </div>
-                </div>
+                    <p class="fw-semibold">Variasi</p>
+                    <div class="d-flex gap-3 mb-3">
+                        <!-- Gambar utama -->
+                        <label>
+                            <input type="radio" name="variation" value="main-{{ $products->id }}" hidden checked>
+                            <img src="{{ asset($products->image) }}"
+                                class="img-thumbnail1 rounded-3 border variation-img active-variation"
+                                style="width: 110px; border: 2px solid #994D1C; cursor: pointer;" alt="Variasi Utama">
+                        </label>
 
-                <!-- Tombol dan Info Ongkir -->
-                <div class="mb-5">
-                    <div class="d-flex align-items-center">
-                        <button
-                            class="btn px-4 me-3 text-light rounded-pill py-2 fw-medium w-75 d-flex justify-content-center align-items-center"
-                            style="background-color: #994D1C;">
-                            <span class="m-0">Masukkan Keranjang</span>
-                            <img src="/img/bag.svg" class="ms-2" alt="Keranjang">
-                        </button>
-                        <div class="d-flex">
-                            <a href="#" class="btn p-2">
-                                <img src="/img/chat.svg" width="60" alt="Chat">
+                        <!-- Gambar dari relasi images -->
+                        @foreach ($products->images as $image)
+                            <label>
+                                <input type="radio" name="variation" value="{{ $image->id }}" hidden>
+                                <img src="{{ asset($image->image_path) }}"
+                                    class="img-thumbnail1 rounded-3 border variation-img"
+                                    style="width: 110px; cursor: pointer;" alt="Variasi Tambahan">
+                            </label>
+                        @endforeach
+
+
+                    </div>
+                    @push('scripts')
+                        <script>
+                            document.querySelectorAll('.variation-img').forEach(img => {
+                                img.addEventListener('click', function() {
+                                    // Hapus highlight dari semua variasi
+                                    document.querySelectorAll('.variation-img').forEach(i => {
+                                        i.classList.remove('active-variation');
+                                        i.style.border = '1px solid #dee2e6';
+                                    });
+
+                                    // Tambahkan highlight ke thumbnail yang dipilih
+                                    this.classList.add('active-variation');
+                                    this.style.border = '2px solid #994D1C';
+
+                                    // Pilih radio button terkait
+                                    const radio = this.previousElementSibling;
+                                    if (radio) {
+                                        radio.checked = true;
+                                    }
+                                });
+                            });
+                        </script>
+                    @endpush
+
+
+                    <!-- Ukuran -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between">
+                            <p class="fw-semibold">Ukuran</p>
+                            <a href="#" class="text-secondary text-decoration-none">
+                                <img src="/img/massage.svg" class="img-fluid" alt="Ukuran"> Petunjuk Ukuran
                             </a>
-                            <a href="#" class="btn p-2">
-                                <img src="/img/love.svg" width="60" alt="Wishlist">
-                            </a>
+                        </div>
+
+                        <div class="btn-group gap-4" role="group">
+                            <input type="radio" class="btn-check" name="size" value="Besar" id="sizeBesar"
+                                autocomplete="off" checked>
+                            <label class="btn bg-light rounded-pill px-4 py-2" for="sizeBesar">Besar</label>
+
+                            <input type="radio" class="btn-check" name="size" value="Sedang" id="sizeSedang"
+                                autocomplete="off">
+                            <label class="btn bg-light rounded-pill px-4 py-2" for="sizeSedang">Sedang</label>
+
+                            <input type="radio" class="btn-check" name="size" value="Kecil" id="sizeKecil"
+                                autocomplete="off">
+                            <label class="btn bg-light rounded-pill px-4 py-2" for="sizeKecil">Kecil</label>
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="/img/truck-fast.svg" alt="Truck" class="img-fluid">
-                        <p class="fw-medium m-0">Gratis ongkir untuk pembelian minimal Rp200.000</p>
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <label for="quantity" class="fw-semibold">Jumlah</label>
+                        <input type="number" name="quantity" id="quantity" value="1" min="1"
+                            class="form-control rounded-pill px-3 py-2 w-50">
                     </div>
-                </div>
+
+                    <!-- Tombol dan Info Ongkir -->
+                    <div class="mb-5">
+                        <div class="d-flex align-items-center">
+                            <button type="submit"
+                                class="btn px-4 me-3 text-light rounded-pill py-2 fw-medium w-75 d-flex justify-content-center align-items-center"
+                                style="background-color: #994D1C;">
+                                <span class="m-0">Masukkan Keranjang</span>
+                                <img src="/img/bag.svg" class="ms-2" alt="Keranjang">
+                            </button>
+                            <div class="d-flex">
+                                <a href="#" class="btn p-2">
+                                    <img src="/img/chat.svg" width="60" alt="Chat">
+                                </a>
+                                <a href="#" class="btn p-2">
+                                    <img src="/img/love.svg" width="60" alt="Wishlist">
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3 mt-3">
+                            <img src="/img/truck-fast.svg" alt="Truck" class="img-fluid">
+                            <p class="fw-medium m-0">Gratis ongkir untuk pembelian minimal Rp200.000</p>
+                        </div>
+                    </div>
+                </form>
             </div>
+
+
 
         </div>
         <div class="other">
@@ -140,10 +213,6 @@
                 <div class="col-md-8">
                     <div class="">
                         <h5>Detail Produk</h5>
-                        <p>{{ $products->description }}</p>
-                    </div>
-                    <div class="">
-                        <h5>Keunggulan</h5>
                         <p>{{ $products->description }}</p>
                     </div>
                 </div>
@@ -160,7 +229,7 @@
         <div class="recomended-product mt-5 pt-5 ">
             <div class="d-flex justify-content-between p-0">
                 <h4 class="text-body-tertiary">PRODUK SERUPA</h4>
-                <a href="{{route('homepage')}}" class="fw-light" style="color: #994D1C;text-decoration: none">
+                <a href="{{ route('homepage') }}" class="fw-light" style="color: #994D1C;text-decoration: none">
                     Selengkapnya
                 </a>
             </div>

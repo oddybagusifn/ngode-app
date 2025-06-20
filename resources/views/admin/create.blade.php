@@ -14,6 +14,16 @@
     </div>
 
     <div class="form-input">
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
         <form method="POST" action="{{ route('admin.product.store') }}" enctype="multipart/form-data" class="rounded p-4"
             style="background-color: #fff; border-color: #F5CCA0;">
             @csrf
@@ -61,6 +71,24 @@
                 <label for="image" class="form-label fs-5">Gambar Produk</label>
                 <input type="file" class="form-control p-2 rounded-3" name="image" id="image" accept="image/*">
             </div>
+
+            <!-- ✅ Upload Thumbnail 1 -->
+            <div class="mb-4">
+                <label for="thumbnail_1" class="form-label fs-5">Thumbnail Produk 1</label>
+                <input type="file" class="form-control p-2 rounded-3" name="thumbnails[]" id="thumbnail_1"
+                    accept="image/*" required>
+            </div>
+
+            <!-- ✅ Upload Thumbnail 2 -->
+            <div class="mb-4">
+                <label for="thumbnail_2" class="form-label fs-5">Thumbnail Produk 2</label>
+                <input type="file" class="form-control p-2 rounded-3" name="thumbnails[]" id="thumbnail_2"
+                    accept="image/*" required>
+            </div>
+
+            <small class="text-muted mt-1 d-block">*Kedua thumbnail wajib diisi untuk menampilkan galeri produk.</small>
+
+
 
             <!-- ✅ Tambahan Deskripsi Produk -->
             <div class="mb-4">

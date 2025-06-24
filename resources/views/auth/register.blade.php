@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -35,35 +34,43 @@
                         <div class="mb-4">
                             <label for="name" class="form-label">Nama Lengkap</label>
                             <input type="text" name="name" class="form-control p-2" id="name"
-                                placeholder="Nama Lengkap">
+                                placeholder="Nama Lengkap" value="{{ old('name') }}">
+                            @error('name')
+                                <p class="text-danger small mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
+
 
                         <div class="mb-4">
                             <label for="email" class="form-label">Alamat Email</label>
                             <input type="email" name="email" class="form-control p-2" id="email"
-                                placeholder="Alamat Email">
-                        </div>
-                        {{-- Password --}}
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Kata Sandi</label>
-                            <input type="password" name="password"
-                                class="form-control p-2 @error('password') is-invalid @enderror" id="password"
-                                placeholder="Kata Sandi" autocomplete="new-password">
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                placeholder="Alamat Email" value="{{ old('email') }}">
+                            @error('email')
+                                <p class="text-danger small mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Konfirmasi Password --}}
+                        {{-- Password --}}
                         <div class="mb-4">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Kata Sandi</label>
-                            <input type="password" name="password_confirmation"
-                                class="form-control p-2 @error('password_confirmation') is-invalid @enderror"
-                                id="password_confirmation" placeholder="Ulangi Kata Sandi" autocomplete="new-password">
-                            @error('password_confirmation')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <label for="password" class="form-label">Kata Sandi</label>
+                            <input type="password" name="password" class="form-control p-2" id="password"
+                                placeholder="Kata Sandi" autocomplete="new-password">
+                            @error('password')
+                                <p class="text-danger small mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
+
+                        {{-- Konfirmasi Password --}}
+                        <div class="mb-4">
+    <label for="password_confirmation" class="form-label">Konfirmasi Kata Sandi</label>
+    <input type="password" name="password_confirmation" class="form-control p-2"
+        id="password_confirmation" placeholder="Ulangi Kata Sandi" autocomplete="new-password">
+    @error('password_confirmation')
+        <p class="text-danger small mt-1">{{ $message }}</p>
+    @enderror
+</div>
+
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="remember">
@@ -73,8 +80,7 @@
                                 Sandi</a>
                         </div>
                         <div class="d-grid mb-3 ">
-                            <button type="submit" class="btn text-white"
-                                style="background-color: #a85525;">Daftar</button>
+                            <button type="submit" class="btn text-white" style="background-color: #a85525;">Daftar</button>
                         </div>
 
                         <div class="text-center text-muted mb-3">atau lanjutkan dengan</div>

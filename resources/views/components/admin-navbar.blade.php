@@ -78,7 +78,7 @@
                         @endif
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end mt-2">
-                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="{{route('profile.page')}}">Profile</a></li>
                         <li>
                             <form method="POST" action="/logout">
                                 @csrf

@@ -1,5 +1,7 @@
 @section('page-title', 'Beranda')
 
+@section('is-dashboard') @endsection
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {

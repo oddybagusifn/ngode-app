@@ -25,4 +25,20 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
+
+    public function feedbacks()
+{
+    return $this->hasMany(Feedback::class);
+}
+
+public function averageRating()
+{
+    return $this->feedbacks()->avg('rating');
+}
+
 }

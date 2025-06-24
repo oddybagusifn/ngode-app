@@ -36,6 +36,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function feedbackLikes()
+{
+    return $this->hasMany(FeedbackLike::class);
+}
+
+public function feedbackComments()
+{
+    return $this->hasMany(FeedbackComment::class);
+}
+
+
     /**
      * Get the attributes that should be cast.
      *

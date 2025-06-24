@@ -10,7 +10,38 @@
             const kecamatanSelect = document.getElementById('kecamatan');
             const kelurahanSelect = document.getElementById('kelurahan');
 
-            // Load kabupaten saat provinsi dipilih
+            const kartuRadio = document.getElementById('kartu');
+            const pembayaranRadios = document.querySelectorAll('input[name="pembayaran"]');
+            const qrisSection = document.getElementById('qrisSection');
+            const creditCardList = document.getElementById('creditCardList');
+
+
+            document.querySelectorAll('input[name="pembayaran"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (kartuRadio.checked) {
+                        creditCardList.style.display = 'block';
+                    } else {
+                        creditCardList.style.display = 'none';
+                    }
+                });
+            });
+
+            pembayaranRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.id === 'qris') {
+                        qrisSection.style.display = 'block';
+                        creditCardList.style.display = 'none';
+                    } else if (this.id === 'kartu') {
+                        creditCardList.style.display = 'block';
+                        qrisSection.style.display = 'none';
+                    } else {
+                        creditCardList.style.display = 'none';
+                        qrisSection.style.display = 'none';
+                    }
+                });
+            });
+
+            // load kabupaten
             provinsiSelect.addEventListener('change', function() {
                 const provId = this.value;
                 fetch(`/checkout/kabupaten?provinsi_id=${provId}`)
@@ -30,7 +61,9 @@
                     .catch(err => console.error('Gagal memuat kabupaten:', err));
             });
 
-            // Load kecamatan saat kabupaten dipilih
+
+
+            // load kecamatan
             kabupatenSelect.addEventListener('change', function() {
                 const kabId = this.value;
                 fetch(`/checkout/kecamatan?kabupaten_id=${kabId}`)
@@ -51,7 +84,7 @@
             // Load kelurahan saat kecamatan dipilih
             kecamatanSelect.addEventListener('change', function() {
                 const kecId = this.value;
-                fetch(`/checkout/kelurahan?kecamatan_id=${kecId}`)
+                fetch("{{ url('/checkout/kelurahan') }}?kecamatan_id=" + kecId)
                     .then(res => res.json())
                     .then(data => {
                         kelurahanSelect.innerHTML =
@@ -84,9 +117,26 @@
         });
     </script>
 
+    <style>
+        #qrisSection,
+        #creditCardList {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-check-input:checked {
+            background-color: #994D1C;
+            border-color: #994D1C;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.15rem rgba(153, 77, 28, 0.25);
+            border-color: #994D1C;
+        }
+    </style>
+
 
     <div class="container-fluid py-5">
-        <form method="POST" action="{{ route('checkout.store') }}">
+        <form action="{{ route('checkout.store') }}" method="POST">
             @csrf
             <div class="row">
                 <!-- Informasi Checkout -->
@@ -100,27 +150,27 @@
                         <p class="text-muted small">Mohon lengkapi informasi pengiriman dengan akurat dan sesuai</p>
                         <div class="row gy-5 mt-2">
                             <div class="col-md-6">
-                                <input name="person_name" type="text" class="form-control" placeholder="Nama Lengkap">
+                                <input name="person_name" type="text" class="form-control" placeholder="Nama Lengkap" required>
                             </div>
                             <div class="col-md-6">
-                                <input name="phone" type="text" class="form-control" placeholder="Nomor Telepon">
+                                <input name="phone" type="text" class="form-control" placeholder="Nomor Telepon" rquired>
                             </div>
 
                             <div class="mt-4" id="alamatLengkapSection">
                                 <div class="row gy-5">
                                     <div class="col-md-6">
                                         <input name="address" type="text" class="form-control"
-                                            placeholder="Alamat Lengkap">
+                                            placeholder="Alamat Lengkap" required>
                                     </div>
                                     <div class="col-md-6">
                                         <input name="postal_code" type="text" class="form-control"
-                                            placeholder="Kode Pos">
+                                            placeholder="Kode Pos" required>
                                     </div>
                                 </div>
 
                                 <div class="row gy-3 mt-3">
                                     <div class="col-md-6">
-                                        <select class="form-select" name="province" id="provinsi">
+                                        <select class="form-select" name="province" id="provinsi" required>
                                             <option selected disabled>Pilih Provinsi</option>
                                             @foreach ($provinces as $province)
                                                 <option value="{{ $province['id'] }}">{{ $province['name'] }}</option>
@@ -128,25 +178,25 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <select id="kabupaten" name="city" class="form-select">
+                                        <select id="kabupaten" name="city" class="form-select" required>
                                             <option selected disabled>Pilih Kabupaten/Kota</option>
                                         </select>
 
                                     </div>
                                     <div class="col-md-6">
-                                        <select id="kecamatan" name="subdistrict" class="form-select mt-3" name="kecamatan">
+                                        <select id="kecamatan" name="subdistrict" class="form-select mt-3" required>
                                             <option selected disabled>Pilih Kecamatan</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <select id="kelurahan" class="form-select mt-3" name="village">
+                                        <select id="kelurahan" class="form-select mt-3" name="village" required>
                                             <option selected disabled>Pilih Kelurahan</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-12 mt-4">
                                     <input type="text" class="form-control"
-                                        placeholder="Detail Lainnya (Cth: Blok / Unit No. / Patokan)">
+                                        placeholder="Detail Lainnya (Cth: Blok / Unit No. / Patokan)" required>
                                 </div>
                             </div>
 
@@ -162,7 +212,7 @@
                         </div>
                         <p class="text-muted small">Mohon pilih opsi layanan pengiriman Anda</p>
                         <div class="mt-3" id="courierOptions" style="display: none;">
-                            <select class="form-select" id="courier" name="courier">
+                            <select class="form-select" id="courier" name="courier" required>
                                 <option selected disabled>Pilih Kurir</option>
                                 @foreach ($couriers as $courier)
                                     <option value="{{ $courier['code'] }}">{{ $courier['description'] }}</option>
@@ -173,51 +223,21 @@
 
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <div class="form-check border p-3 rounded">
+                                <div class="form-check border p-3 rounded-3">
                                     <input class="form-check-input" type="radio" name="pengiriman" id="antar"
-                                        value="antar" checked>
+                                        value="antar" checked required>
                                     <label class="form-check-label" for="antar">
                                         Antar ke Alamat<br><small class="text-muted">Mulai dari Rp0</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-check border p-3 rounded">
+                                <div class="form-check border p-3 rounded-3">
                                     <input class="form-check-input" type="radio" name="pengiriman" id="toko"
                                         value="toko">
                                     <label class="form-check-label" for="toko">
                                         Ambil di Toko<br><small class="text-muted">Gratis</small>
                                     </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Opsi Pembayaran -->
-                    <div class="border rounded-4 p-4 mb-4 shadow-sm">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6 class="fw-bold">Opsi Pembayaran</h6>
-                            <span class="text-muted">Langkah 3 dari 3</span>
-                        </div>
-                        <p class="text-muted small">Mohon pilih opsi pembayaran Anda dan pastikan data yang dimasukkan telah
-                            benar</p>
-                        <div class="row g-3 mt-2">
-                            <div class="col-md-4">
-                                <div class="form-check border p-3 rounded">
-                                    <input class="form-check-input" type="radio" name="pembayaran" id="cod">
-                                    <label class="form-check-label" for="cod">Bayar di Tempat</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check border p-3 rounded">
-                                    <input class="form-check-input" type="radio" name="pembayaran" id="kartu">
-                                    <label class="form-check-label" for="kartu">Kartu Kredit/Debit</label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-check border p-3 rounded">
-                                    <input class="form-check-input" type="radio" name="pembayaran" id="qris">
-                                    <label class="form-check-label" for="qris">QRIS</label>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +262,7 @@
                                 value="{{ $item->quantity }}">
                             <input type="hidden" name="products[{{ $loop->index }}][size]"
                                 value="{{ $item->size }}">
-                                <input type="hidden" name="total_price" value="{{ $totalHarga }}">
+                            <input type="hidden" name="total_price" value="{{ $totalHarga }}">
                         @endforeach
 
                         @php $total = 0; @endphp
@@ -285,7 +305,7 @@
                             <span>Total Harga</span>
                             <span>Rp{{ number_format($totalHarga, 0, ',', '.') }}</span>
                         </div>
-                        <button type="submit" class="btn btn-secondary w-100 mt-3 rounded-pill">Beli Sekarang</button>
+                        <button type="submit" class="btn btn-secondary rounded-pill py-2 mt-3">Bayar Sekarang</button>
                     </div>
                 </div>
 

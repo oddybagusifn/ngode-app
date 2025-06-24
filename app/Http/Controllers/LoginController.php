@@ -9,8 +9,7 @@ class LoginController extends Controller
 {
     public function index()
     {
-
-        return view('auth/login');
+        return view('auth.login');
     }
 
     public function store(Request $request)
@@ -21,14 +20,20 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+    $request->session()->regenerate();
 
-            $user = Auth::user();
-            if ($user->role === 'admin') {
-                return redirect()->intended('/admin');
-            }
-            return redirect()->intended('/');
-        }
+    $user = Auth::user();
+
+    if ($user->role === 'admin') {
+        return redirect()->intended('/admin');
+    } elseif ($user->role === 'user') {
+        return redirect()->intended('/homepage');
+    }
+
+    // Optional: fallback jika role tidak diketahui
+    Auth::logout();
+    return redirect('/login')->withErrors(['login' => 'Role tidak dikenali.']);
+}
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
@@ -36,13 +41,10 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request)
-{
-    Auth::logout();
-
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect('/login');
-}
-
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    }
 }

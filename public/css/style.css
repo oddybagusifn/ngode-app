@@ -69,6 +69,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         transform: translateX(0);
     }
 
+    #qrisSection, #creditCardList {
+    transition: all 0.3s ease-in-out;
+}
+
+    .btn-tab.active {
+        font-weight: bold;
+        color: #994D1C;
+        text-decoration: underline;
+    }
+
+
+    #mainImage {
+    transition: opacity 0.3s ease-in-out;
+}
+
+#mainImage.fade-out {
+    opacity: 0;
+}
+
+#mainImage.fade-in {
+    opacity: 1;
+}
+
+
+
+
+
 
 
 

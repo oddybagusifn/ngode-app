@@ -6,11 +6,15 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GoogleAuthController;
-use App\Http\Controllers\PaymentController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::get('/', function () {
     return view('landingPage');
@@ -19,19 +23,26 @@ Route::get('/', function () {
 Route::get('/homepage', [UserController::class, 'homepage'])->name('homepage');
 Route::get('/homepage/product/{id}', [UserController::class, 'product'])->name('homepage.product');
 
-Route::get('/register', [RegisterController::class, 'index']);
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+ Route::get('/register', [RegisterController::class, 'index']);
+    Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+    Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
 
-Route::get('/auth/redirect/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+Route::middleware(['web'])->group(function () {
+    Route::get('/auth/redirect/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+});
+
+
+Route::get('/profile', [ProfileController::class, 'index'])->name('profile.page');
+
 
 // middleware admin
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
@@ -69,5 +80,48 @@ Route::get('/checkout/list-kurir', [CheckoutController::class, 'listKurir'])
 
 
 Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::post('/checkout/payment', [PaymentController::class, 'index'])->name('checkout.payment');
+Route::get('/checkout/payment', [MidtransController::class, 'pay'])->name('checkout.payment.snap');
+
+Route::post('/midtrans/callback', [MidtransController::class, 'callback'])
+    ->withoutMiddleware([VerifyCsrfToken::class])
+    ->name('midtrans.callback');
+
+
+Route::get('/checkout/success', [FeedbackController::class, 'index'])->name('checkout.success');
+
+Route::get('/checkout/cancel', function () {
+    return view('user.checkout-cancel'); // Buat file view ini
+})->name('checkout.cancel');
+
+Route::get('/checkout/failed', function () {
+    return view('user.checkout-failed'); // Buat file view ini
+})->name('checkout.failed');
+
+
+Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.page');
+
+Route::post('/feedback/store', [FeedbackController::class, 'store'])->name('feedback.store');
+
+Route::post('/feedback/{id}/like', [FeedbackController::class, 'like'])->name('feedback.like');
+Route::post('/feedback/{id}/comment', [FeedbackController::class, 'comment'])->name('feedback.comment');
+
+Route::post('/feedback/{id}/toggle-like', [FeedbackController::class, 'toggleLike'])->name('feedback.toggleLike');
+
+Route::get('/search', [ProductController::class, 'search'])->name('products.search');
+
+Route::get('/search/products', [UserController::class, 'searchAjax'])->name('products.search.ajax');
+
+Route::get('/filter/products', [UserController::class, 'filterByCategory']);
+
+
+Route::get('/debug-csrf', function () {
+    return response()->json([
+        'csrf_token' => csrf_token(),
+        'session_token' => session()->token(),
+    ]);
+});
+
+
+
+
 

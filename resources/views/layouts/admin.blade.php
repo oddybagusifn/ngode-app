@@ -9,14 +9,17 @@
             <p class="fw-medium fs-2 ms-5 p-2">
                 @yield('page-title', 'Beranda')
             </p>
-            <div class="ms-auto gap-4">
-                <button class="btn me-2" style="border: 1px solid #F5CCA0;border-radius:12px;">
-                    Unduh Laporan (.pdf)
-                </button>
-                <button class="btn" style="border: 1px solid #F5CCA0;border-radius:12px;">
-                    Unduh Laporan (.xlsx)
-                </button>
-            </div>
+            @if(View::hasSection('is-dashboard'))
+    <div class="ms-auto gap-4">
+        <button class="btn me-2" style="border: 1px solid #F5CCA0;border-radius:12px;">
+            Unduh Laporan (.pdf)
+        </button>
+        <button class="btn" style="border: 1px solid #F5CCA0;border-radius:12px;">
+            Unduh Laporan (.xlsx)
+        </button>
+    </div>
+@endif
+
         </div>
 
         <div class="body w-100 mt-4 d-flex" style="min-height:500px">

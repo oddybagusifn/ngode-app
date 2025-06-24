@@ -6,13 +6,13 @@
                 <a href="#" class="text-dark">
                     <img src="/img/fb.svg" alt="">
                 </a>
-                <a href="#" class="text-dark">
+                <a href="https://www.instagram.com/nfldfaa_/" class="text-dark" target="_blank" rel="noopener noreferrer">
                     <img src="/img/Instagram.svg" alt="">
                 </a>
                 <a href="#" class="text-dark">
                     <img src="/img/Twitter.svg" alt="">
                 </a>
-                <a href="#" class="text-dark">
+                <a href="https://www.linkedin.com/in/nfldfaa/" class="text-dark" target="_blank" rel="noopener noreferrer">
                     <img src="/img/LinkedIn.svg" alt="">
                 </a>
             </div>

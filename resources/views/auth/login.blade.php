@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -31,40 +30,59 @@
 
                     <form method="POST" action="{{ route('login.store') }}">
                         @csrf
-                        <div class="mb-5">
-                            <label for="email" class="form-label">Alamat Email</label>
-                            <input type="email" name="email" class="form-control p-2" id="email" placeholder="Alamat Email">
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Kata Sandi</label>
-                            <input type="password" name="password" class="form-control p-2" id="password" placeholder="Kata Sandi">
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-5 pb-5">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remember">
-                                <label class="form-check-label" for="remember">Ingat Saya</label>
+                        <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Alamat Email</label>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                    class="form-control p-2 border @error('email') border-danger @enderror" id="email"
+                                    placeholder="Alamat Email">
+                                @error('email')
+                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
-                            <a href="#" class="text-decoration-none small" style="color: #a85525">Lupa Kata Sandi</a>
-                        </div>
-                        <div class="d-grid pt-5 mb-3 ">
-                            <button type="submit" class="btn text-white"
-                                style="background-color: #a85525;">Masuk</button>
-                        </div>
 
-                        <div class="text-center text-muted mb-3">atau lanjutkan dengan</div>
-                        <div class="d-flex gap-2 mb-3">
-                            <a href="{{ route('google.redirect') }}" class="btn btn-outline-dark w-50">
-                                <img src="img/google.svg" alt=""> Google
-                            </a>
-                            <a href="#" class="btn btn-outline-dark w-50">
-                                <img src="img/facebook.svg" alt=""> Facebook
-                            </a>
-                        </div>
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Kata Sandi</label>
+                                <input type="password" name="password"
+                                    class="form-control p-2 border @error('password') border-danger @enderror"
+                                    id="password" placeholder="Kata Sandi">
+                                @error('password')
+                                    <p class="text-danger small mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        <div class="text-center">
-                            <small class="text-muted">Belum Punya Akun? <a href="/register"
-                                    class="text-decoration-none" style="color: #a85525">Daftar</a></small>
-                        </div>
+                            <!-- General Login Error (contoh: Email atau password salah) -->
+                            @if (session('error'))
+                                <p class="text-danger small mt-1">{{ session('error') }}</p>
+                            @endif
+                            <div class="d-flex justify-content-between align-items-center mb-5 pb-5">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember">
+                                    <label class="form-check-label" for="remember">Ingat Saya</label>
+                                </div>
+                                <a href="#" class="text-decoration-none small" style="color: #a85525">Lupa Kata
+                                    Sandi</a>
+                            </div>
+                            <div class="d-grid pt-5 mb-3 ">
+                                <button type="submit" class="btn text-white"
+                                    style="background-color: #a85525;">Masuk</button>
+                            </div>
+
+                            <div class="text-center text-muted mb-3">atau lanjutkan dengan</div>
+                            <div class="d-flex gap-2 mb-3">
+                                <a href="{{ route('google.redirect') }}" class="btn btn-outline-dark w-50">
+                                    <img src="img/google.svg" alt=""> Google
+                                </a>
+                                <a href="#" class="btn btn-outline-dark w-50">
+                                    <img src="img/facebook.svg" alt=""> Facebook
+                                </a>
+                            </div>
+
+                            <div class="text-center">
+                                <small class="text-muted">Belum Punya Akun? <a href="/register" class="text-decoration-none"
+                                        style="color: #a85525">Daftar</a></small>
+                            </div>
                     </form>
 
                     <p class="text-center text-muted mt-4 small">2025 Ngode. Hak cipta dilindungi undang-undang.</p>

@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Midtrans\Snap;
 use App\Models\Cart;
+use Midtrans\Config;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 
 class CheckoutController extends Controller
@@ -24,30 +30,32 @@ class CheckoutController extends Controller
 
         $apiKey = '92fe18cb91d81b605393db36e45a5ed7ef24cf0cd557ba1b9d8552c1e27a4907';
 
-        $provinces = [];
-        $response = Http::get('https://api.binderbyte.com/wilayah/provinsi', [
-            'api_key' => $apiKey
-        ]);
+        $provinces = Cache::remember('provinces', now()->addHours(6), function () use ($apiKey) {
+            $response = Http::get('https://api.binderbyte.com/wilayah/provinsi', [
+                'api_key' => $apiKey
+            ]);
 
-        if ($response->successful()) {
-            $provinces = $response->json()['value'];
-        }
+            if ($response->successful()) {
+                return $response->json()['value'];
+            }
+
+            return [];
+        });
 
 
-        $couriers = [];
-        $response = Http::get('https://api.binderbyte.com/v1/list_courier', [
-            'api_key' => $apiKey
-        ]);
+        $couriers = Cache::remember('popular_couriers', now()->addHours(6), function () use ($apiKey) {
+            $response = Http::get('https://api.binderbyte.com/v1/list_courier', [
+                'api_key' => $apiKey
+            ]);
 
-        if ($response->successful()) {
-            $popularCodes = ['jne', 'jnt', 'sicepat', 'anteraja', 'tiki', 'pos'];
-            $allCouriers = $response->json();
+            if ($response->successful()) {
+                $popularCodes = ['jne', 'jnt', 'sicepat', 'anteraja', 'tiki', 'pos'];
+                $allCouriers = $response->json();
+                return array_filter($allCouriers, fn($c) => in_array($c['code'], $popularCodes));
+            }
 
-            // Filter hanya kurir populer
-            $couriers = array_filter($allCouriers, function ($courier) use ($popularCodes) {
-                return in_array($courier['code'], $popularCodes);
-            });
-        }
+            return [];
+        });
 
         $totalProduk = 0;
         foreach ($cartItems as $item) {
@@ -61,8 +69,24 @@ class CheckoutController extends Controller
 
         $totalHarga = $totalProduk + $biayaKemasan + $biayaPengiriman + $biayaLayanan - $diskon;
 
+        Config::$serverKey = config('midtrans.serverKey');
+        Config::$isProduction = false;
 
-        return view('user.checkout', compact('cartItems', 'provinces', 'couriers', 'totalHarga'));
+        $params = [
+            'transaction_details' => [
+                'order_id' => rand(),
+                'gross_amount' => 100000,
+            ],
+            'customer_details' => [
+                'first_name' => 'Nama',
+                'email' => 'email@example.com',
+            ]
+        ];
+
+        $snapToken = Snap::getSnapToken($params);
+
+
+        return view('user.checkout', compact('cartItems', 'provinces', 'couriers', 'totalHarga', 'snapToken'));
     }
 
 
@@ -126,9 +150,95 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
 
-        dd($request->all());
+        $user = Auth::user();
 
-        return back()->with('success', 'Produk berhasil dimasukkan ke keranjang.');
+        $customerName = $request->input('person_name');
+        $email = $user->email;
+        $totalHarga = (int) $request->input('total_price');
+        $products = $request->input('products');
+        $orderId = 'NGODE-' . rand(100000, 999999);
+
+        $order = Order::create([
+            'order_id'        => $orderId,
+            'user_id'         => $user->id,
+            'person_name'     => $customerName,
+            'phone'           => $request->phone,
+            'address'         => $request->address,
+            'province'        => $request->province,
+            'city'            => $request->city,
+            'subdistrict'     => $request->subdistrict,
+            'village'         => $request->village,
+            'postal_code'     => $request->postal_code,
+            'delivery_method' => $request->pengiriman,
+            'courier' => $request->courier,
+            'payment_method'  => 'midtrans',
+            'total_price'     => $totalHarga,
+            'status'          => 'paid',
+        ]);
+
+        foreach ($products as $product) {
+            OrderDetail::create([
+                'order_id'     => $order->id,
+                'product_id'   => $product['product_id'],
+                'product_name' => $product['name'],
+                'quantity'     => $product['quantity'],
+                'price'        => $product['price'],
+                'size'        => $product['size'],
+            ]);
+        }
+
+        // Midtrans item_details
+        $itemDetails = [];
+        foreach ($products as $product) {
+            $itemDetails[] = [
+                'id' => $product['product_id'],
+                'price' => (int) $product['price'],
+                'quantity' => (int) $product['quantity'],
+                'name' => $product['name'] . ' (' . $product['size'] . ')',
+            ];
+        }
+
+        // Tambahan biaya
+        $itemDetails[] = ['id' => 'biaya_kemasan', 'price' => 20000, 'quantity' => 1, 'name' => 'Biaya Kemasan'];
+        $itemDetails[] = ['id' => 'biaya_pengiriman', 'price' => 25000, 'quantity' => 1, 'name' => 'Biaya Pengiriman'];
+        $itemDetails[] = ['id' => 'biaya_layanan', 'price' => 5000, 'quantity' => 1, 'name' => 'Biaya Layanan'];
+        $itemDetails[] = ['id' => 'diskon', 'price' => -20000, 'quantity' => 1, 'name' => 'Diskon'];
+
+        // Konfigurasi Midtrans
+        \Midtrans\Config::$serverKey = config('midtrans.serverKey');
+        \Midtrans\Config::$isProduction = config('midtrans.isProduction', false);
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => $totalHarga,
+            ],
+            'item_details' => $itemDetails,
+            'customer_details' => [
+                'first_name' => $customerName ?? 'Customer',
+                'email' => $email,
+                'billing_address' => [
+                    'address' => $request->address ?? '-',
+                    'city' => $request->city ?? '-',
+                    'postal_code' => $request->postal_code ?? '-',
+                ],
+            ],
+            'callbacks' => [
+                'finish' => route('checkout.success'),
+                'unfinish' => route('checkout.cancel'),
+                'error' => route('checkout.failed'),
+            ],
+            'notification_url' => 'https://984e-118-96-101-192.ngrok-free.app/midtrans/callback',
+        ];
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+        Cart::where('user_id', $user->id)->delete();
+
+        return view('user.payment-popup', compact('snapToken'));
     }
 }

@@ -30,23 +30,42 @@
         </button>
         <div class="collapse navbar-collapse ms-5" id="navbarNavDropdown">
             <div class="nav-link w-100 d-flex justify-content-center gap-3 align-items-center">
-                <div class="data-search w-25 p-0 m-0 d-flex align-items-center rounded-pill px-2"
+                <form action="{{ route('products.search') }}" method="GET"
+                    class="data-search w-25 p-0 m-0 d-flex align-items-center rounded-pill px-2"
                     style="height: 40px;border: 1px solid #F5CCA0">
                     <img class="img-fluid me-2" style="width: 20px" src="/img/search-normal.svg" alt="Icon Pencarian">
                     <input type="text" id="searchInput" class="form-control border-0 p-0 text-secondary"
                         placeholder="Pencarian" style="box-shadow: none;">
+
+                </form>
+
+
+                @php
+                    use App\Models\Category;
+                    $categories = Category::all(); // Pastikan model Category sudah ada dan table categories tersedia
+                @endphp
+
+                <div class="data-filter dropdown">
+                    <button class="btn p-0 border-0 bg-transparent " type="button" id="filterDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="img-fluid me-2" style="width: 45px" src="/img/filter.svg" alt="Icon Filter">
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                        <li><a class="dropdown-item" href="#" data-category="all">Semua Kategori</a></li>
+                        @foreach ($categories as $category)
+                            <li><a class="dropdown-item" href="#"
+                                    data-category="{{ $category->id }}">{{ $category->name }}</a></li>
+                        @endforeach
+                    </ul>
                 </div>
 
-                <div class="data-filter">
-                    <img class="img-fluid me-2" style="width: 45px" src="/img/filter.svg" alt="Icon Filter">
-                </div>
             </div>
 
             <div class="d-flex flex-column flex-sm-row align-items-center ms-auto gap-2">
                 <div class="me-3">
                     <div class="position-relative">
-                        <button onclick="toggleCartSidebar()" class="btn p-0">
-                            <img src="/img/cart.svg" alt="Cart">
+                        <button onclick="toggleCartSidebar()" class="btn border-0 p-0">
+                            <img src="/img/cart.svg" width="45px" alt="Cart">
                             @if (isset($cartItemsCount) && $cartItemsCount > 0)
                                 <span class="position-absolute start-100 badge rounded-pill bg-danger"
                                     style="top: 6px; transform: translate(-90%, 0); font-size: 0.6rem; min-width: 16px; height: 16px; padding: 2px 4px;">
@@ -60,7 +79,7 @@
 
                 <a class="nav-link text-secondary rounded-circle p-0 me-3" href="#"
                     style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                    <img src="{{ asset('img/favorite.svg') }}" alt="Fav">
+                    <img src="{{ asset('img/favorite.svg') }}" width="45px" alt="Fav">
                 </a>
 
                 @if ($user)
@@ -83,7 +102,7 @@
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end mt-2">
-                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="{{route('profile.page')}}">Profile</a></li>
                             @if ($user->role === 'admin')
                                 <li><a class="dropdown-item" href="/admin">Dashboard</a></li>
                             @endif
@@ -115,3 +134,26 @@
         </ul>
     </div>
 </nav>
+
+<style>
+    .dropdown-menu {
+        border: 2px solid #F5CCA0;
+        border-radius: 8px;
+        padding: 0.3rem 0;
+        min-width: 300px;
+        background-color: #fff;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .dropdown-item {
+        padding: 10px 16px;
+        font-size: 14px;
+        color: #333;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #9898981b;
+        color: #000;
+    }
+</style>

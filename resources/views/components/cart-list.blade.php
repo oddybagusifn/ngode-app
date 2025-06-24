@@ -53,7 +53,7 @@
                 <p class="m-0">Total</p>
                 <p class="fw-semibold m-0 fs-5">Rp{{ number_format($totalPrice, 0, ',', '.') }}</p>
             </div>
-            <a href="{{route('checkout.index')}}" class="text-decoration-none fw-semibold text-light py-2 px-3 rounded-3" style="background-color: #994D1C">
+            <a href="{{route('checkout.index')}}" class="text-decoration-none fw-semibold text-light py-2 px-3 rounded-pill" style="background-color: #994D1C">
                 Checkout ({{ $cartItems->count() }})
             </a>
         </div>

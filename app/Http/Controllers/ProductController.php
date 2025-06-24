@@ -11,4 +11,15 @@ class ProductController extends Controller
     {
         return Product::latest()->take($limit)->get();
     }
+
+    public function search(Request $request)
+{
+    $keyword = $request->input('keyword');
+
+    $products = Product::where('name', 'like', "%{$keyword}%")
+        ->select('id', 'name', 'price', 'image')
+        ->get();
+
+    return response()->json(['products' => $products]);
+}
 }
